@@ -1,142 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CivicChain × UNICEF</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
-    :root {
-      --bg:       #06090f;
-      --surface:  #0d1421;
-      --border:   #1a2d45;
-      --accent:   #00c2ff;
-      --green:    #00e5a0;
-      --orange:   #ff6b35;
-      --yellow:   #ffd166;
-      --blue:     #118ab2;
-      --text:     #ddeeff;
-      --muted:    #4a7a9b;
-    }
-    * { box-sizing: border-box; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Space Grotesk', sans-serif;
-      min-height: 100vh;
-    }
-    /* NAV */
-    .navbar { background: var(--surface) !important; border-bottom: 1px solid var(--border); }
-    .navbar-brand { font-weight: 700; color: var(--accent) !important; letter-spacing: .04em; }
-    .navbar-brand span { color: var(--text); }
-    .nav-link { color: var(--muted) !important; font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; transition: color .2s; }
-    .nav-link.active, .nav-link:hover { color: var(--accent) !important; }
-    .nav-link.active { border-bottom: 2px solid var(--accent); }
-    .badge-unicef { font-size: .65rem; background: rgba(0,194,255,.12); color: var(--accent); border: 1px solid rgba(0,194,255,.3); border-radius: 4px; padding: 2px 7px; letter-spacing: .1em; }
-
-    /* PAGES */
-    .page { display: none; }
-    .page.active { display: block; }
-
-    /* CARDS */
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
-    .card-header { background: transparent; border-bottom: 1px solid var(--border); font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
-
-    /* STAT CARDS */
-    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 16px; text-align: center; }
-    .stat-num { font-family: 'JetBrains Mono', monospace; font-size: 2rem; font-weight: 700; line-height: 1; }
-    .stat-label { font-size: .72rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-top: 5px; }
-
-    /* CATEGORY CARDS */
-    .cat-card { background: var(--surface); border: 2px solid var(--border); border-radius: 10px; padding: 18px 14px; cursor: pointer; transition: all .2s; text-align: center; }
-    .cat-card:hover { border-color: var(--accent); background: #0d1e30; }
-    .cat-card.selected { border-color: var(--accent); background: #0d1e30; box-shadow: 0 0 0 3px rgba(0,194,255,.15); }
-    .cat-icon { font-size: 2rem; margin-bottom: 8px; }
-    .cat-label { font-size: .82rem; font-weight: 600; }
-
-    /* STATUS BADGES */
-    .badge-open     { background: rgba(255,107,53,.15); color: var(--orange); border: 1px solid rgba(255,107,53,.35); }
-    .badge-inprogress { background: rgba(255,209,102,.15); color: var(--yellow); border: 1px solid rgba(255,209,102,.35); }
-    .badge-resolved { background: rgba(0,229,160,.15); color: var(--green); border: 1px solid rgba(0,229,160,.35); }
-    .badge-chain    { background: rgba(0,194,255,.1); color: var(--accent); border: 1px solid rgba(0,194,255,.3); font-size: .65rem; letter-spacing: .1em; }
-    .badge-new      { background: rgba(255,107,53,.15); color: var(--orange); border: 1px solid rgba(255,107,53,.3); font-size: .6rem; }
-
-    /* HASH BOX */
-    .hash-box { background: #04080e; border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-family: 'JetBrains Mono', monospace; font-size: .72rem; color: #4a9fbf; word-break: break-all; }
-
-    /* MAP */
-    .map-wrap { background: #09111d; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; position: relative; }
-    .map-legend { position: absolute; bottom: 10px; right: 10px; background: rgba(6,9,15,.92); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: .7rem; color: var(--muted); }
-
-    /* TABLE */
-    .report-table { width: 100%; }
-    .report-table thead th { background: var(--surface); color: var(--muted); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; border-bottom: 1px solid var(--border); padding: 10px 12px; font-weight: 400; }
-    .report-table tbody tr { border-bottom: 1px solid #0d1e2e; cursor: pointer; transition: background .15s; }
-    .report-table tbody tr:hover { background: #0d1520; }
-    .report-table tbody td { padding: 11px 12px; font-size: .82rem; vertical-align: middle; }
-
-    /* FORM */
-    .form-control, .form-select {
-      background: #04080e !important;
-      border: 1px solid var(--border) !important;
-      color: var(--text) !important;
-      font-family: 'Space Grotesk', sans-serif;
-    }
-    .form-control:focus, .form-select:focus { border-color: var(--accent) !important; box-shadow: 0 0 0 3px rgba(0,194,255,.12) !important; }
-    .form-control::placeholder { color: var(--muted); }
-    .form-label { font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-
-    /* STEP INDICATORS */
-    .steps { display: flex; gap: 8px; margin-bottom: 24px; }
-    .step-dot { height: 4px; flex: 1; border-radius: 2px; background: var(--border); transition: background .3s; }
-    .step-dot.done { background: var(--accent); }
-
-    /* BUTTONS */
-    .btn-primary { background: linear-gradient(135deg, var(--accent), #0055cc); border: none; font-weight: 600; letter-spacing: .06em; transition: opacity .2s, transform .2s; }
-    .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
-    .btn-outline-secondary { border-color: var(--border); color: var(--muted); }
-    .btn-outline-secondary:hover { border-color: var(--accent); color: var(--accent); background: transparent; }
-
-    /* PHOTO UPLOAD */
-    .photo-zone { border: 2px dashed var(--border); border-radius: 8px; padding: 32px; text-align: center; cursor: pointer; transition: border-color .2s; color: var(--muted); font-size: .88rem; }
-    .photo-zone:hover { border-color: var(--accent); }
-    .photo-zone.captured { border-color: var(--green); background: rgba(0,229,160,.05); color: var(--green); }
-
-    /* SUCCESS BOX */
-    .success-box { background: rgba(0,229,160,.06); border: 1px solid rgba(0,229,160,.25); border-radius: 10px; padding: 24px; text-align: center; }
-
-    /* MODAL */
-    .modal-content { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
-    .modal-header { border-bottom: 1px solid var(--border); }
-    .modal-footer { border-top: 1px solid var(--border); }
-    .btn-close { filter: invert(1); }
-
-    /* LANG TOGGLE */
-    .lang-btn { background: none; border: 1px solid var(--border); color: var(--muted); font-size: .72rem; padding: 3px 9px; border-radius: 4px; cursor: pointer; transition: all .2s; letter-spacing: .1em; }
-    .lang-btn.active { border-color: var(--accent); color: var(--accent); }
-
-    /* PROGRESS BARS */
-    .progress { background: var(--border); border-radius: 3px; height: 5px; }
-    .progress-bar { border-radius: 3px; transition: width .5s ease; }
-
-    /* PULSE DOT */
-    @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:.5} }
-    .pulse-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; animation: pulse 2s infinite; }
-
-    /* CHAIN TICK animation */
-    @keyframes chainFade { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-    .chain-anim { animation: chainFade .4s ease; }
-
-    /* SCROLLBAR */
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-thumb { background: var(--border); }
-
-    .text-accent { color: var(--accent); }
-    .text-muted-custom { color: var(--muted); }
-    .border-custom { border-color: var(--border) !important; }
-    .mono { font-family: 'JetBrains Mono', monospace; }
+    :root{--bg:#06090f;--surface:#0d1421;--border:#1a2d45;--accent:#00c2ff;--green:#00e5a0;--orange:#ff6b35;--yellow:#ffd166;--blue:#118ab2;--text:#ddeeff;--muted:#4a7a9b}
+    *{box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh}
+    .navbar{background:var(--surface)!important;border-bottom:1px solid var(--border)}
+    .navbar-brand{font-weight:700;color:var(--accent)!important;letter-spacing:.04em}
+    .nav-link{color:var(--muted)!important;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;transition:color .2s}
+    .nav-link.active,.nav-link:hover{color:var(--accent)!important}
+    .nav-link.active{border-bottom:2px solid var(--accent)}
+    .badge-unicef{font-size:.65rem;background:rgba(0,194,255,.12);color:var(--accent);border:1px solid rgba(0,194,255,.3);border-radius:4px;padding:2px 7px;letter-spacing:.1em}
+    .page{display:none}.page.active{display:block}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:10px}
+    .card-header{background:transparent;border-bottom:1px solid var(--border);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 16px;text-align:center}
+    .stat-num{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;line-height:1}
+    .stat-label{font-size:.72rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:5px}
+    .cat-card{background:var(--surface);border:2px solid var(--border);border-radius:10px;padding:18px 14px;cursor:pointer;transition:all .2s;text-align:center}
+    .cat-card:hover{border-color:var(--accent);background:#0d1e30}
+    .cat-card.selected{border-color:var(--accent);background:#0d1e30;box-shadow:0 0 0 3px rgba(0,194,255,.15)}
+    .cat-icon{font-size:2rem;margin-bottom:8px}.cat-label{font-size:.82rem;font-weight:600}
+    .badge-open{background:rgba(255,107,53,.15);color:var(--orange);border:1px solid rgba(255,107,53,.35)}
+    .badge-inprogress{background:rgba(255,209,102,.15);color:var(--yellow);border:1px solid rgba(255,209,102,.35)}
+    .badge-resolved{background:rgba(0,229,160,.15);color:var(--green);border:1px solid rgba(0,229,160,.35)}
+    .badge-chain{background:rgba(0,194,255,.1);color:var(--accent);border:1px solid rgba(0,194,255,.3);font-size:.65rem;letter-spacing:.1em}
+    .badge-new{background:rgba(255,107,53,.15);color:var(--orange);border:1px solid rgba(255,107,53,.3);font-size:.6rem}
+    .hash-box{background:#04080e;border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#4a9fbf;word-break:break-all}
+    /* REAL LEAFLET MAP */
+    #leaflet-map{height:440px;width:100%;border-radius:10px;border:1px solid var(--border);z-index:1}
+    .leaflet-tile{filter:brightness(.72) saturate(.5) hue-rotate(180deg) invert(1)}
+    .leaflet-container{background:var(--bg)}
+    .leaflet-popup-content-wrapper{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.6)}
+    .leaflet-popup-tip{background:var(--surface)}
+    .leaflet-popup-close-button{color:var(--muted)!important}
+    .leaflet-control-zoom a{background:var(--surface)!important;color:var(--text)!important;border-color:var(--border)!important}
+    .leaflet-control-attribution{background:rgba(13,20,33,.85)!important;color:var(--muted)!important;font-size:.6rem!important}
+    .leaflet-control-attribution a{color:var(--muted)!important}
+    /* GPS ZONE */
+    .gps-zone{border:2px dashed var(--border);border-radius:8px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;color:var(--muted);font-size:.88rem}
+    .gps-zone:hover{border-color:var(--accent)}
+    .gps-zone.locating{border-color:var(--yellow);background:rgba(255,209,102,.04);color:var(--yellow);cursor:wait}
+    .gps-zone.captured{border-color:var(--green);background:rgba(0,229,160,.05);color:var(--green);cursor:default}
+    .gps-zone.failed{border-color:var(--orange);background:rgba(255,107,53,.05)}
+    .accuracy-bar{height:4px;border-radius:2px;background:var(--border);margin-top:8px}
+    .accuracy-fill{height:100%;border-radius:2px;transition:width .4s,background .4s}
+    .report-table{width:100%}
+    .report-table thead th{background:var(--surface);color:var(--muted);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;border-bottom:1px solid var(--border);padding:10px 12px;font-weight:400}
+    .report-table tbody tr{border-bottom:1px solid #0d1e2e;cursor:pointer;transition:background .15s}
+    .report-table tbody tr:hover{background:#0d1520}
+    .report-table tbody td{padding:11px 12px;font-size:.82rem;vertical-align:middle}
+    .form-control,.form-select{background:#04080e!important;border:1px solid var(--border)!important;color:var(--text)!important;font-family:'Space Grotesk',sans-serif}
+    .form-control:focus,.form-select:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px rgba(0,194,255,.12)!important}
+    .form-control::placeholder{color:var(--muted)}
+    .form-label{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+    .steps{display:flex;gap:8px;margin-bottom:24px}
+    .step-dot{height:4px;flex:1;border-radius:2px;background:var(--border);transition:background .3s}
+    .step-dot.done{background:var(--accent)}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),#0055cc);border:none;font-weight:600;letter-spacing:.06em;transition:opacity .2s,transform .2s}
+    .btn-primary:hover{opacity:.88;transform:translateY(-1px)}
+    .btn-primary:disabled{opacity:.4;transform:none}
+    .btn-outline-secondary{border-color:var(--border);color:var(--muted)}
+    .btn-outline-secondary:hover{border-color:var(--accent);color:var(--accent);background:transparent}
+    .success-box{background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.25);border-radius:10px;padding:24px;text-align:center}
+    .modal-content{background:var(--surface);border:1px solid var(--border);color:var(--text)}
+    .modal-header{border-bottom:1px solid var(--border)}.modal-footer{border-top:1px solid var(--border)}
+    .btn-close{filter:invert(1)}
+    .lang-btn{background:none;border:1px solid var(--border);color:var(--muted);font-size:.72rem;padding:3px 9px;border-radius:4px;cursor:pointer;transition:all .2s;letter-spacing:.1em}
+    .lang-btn.active{border-color:var(--accent);color:var(--accent)}
+    .progress{background:var(--border);border-radius:3px;height:5px}
+    .progress-bar{border-radius:3px;transition:width .5s ease}
+    @keyframes chainFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .chain-anim{animation:chainFade .4s ease}
+    @keyframes markerPulse{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.4);opacity:0}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spinning{display:inline-block;animation:spin 1s linear infinite}
+    ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border)}
+    .text-accent{color:var(--accent)}.text-muted-custom{color:var(--muted)}.border-custom{border-color:var(--border)!important}.mono{font-family:'JetBrains Mono',monospace}
+    .civic-marker{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid rgba(255,255,255,.25);box-shadow:0 2px 10px rgba(0,0,0,.6);cursor:pointer;position:relative;z-index:2}
+    .marker-pulse{position:absolute;width:32px;height:32px;border-radius:50%;animation:markerPulse 2s ease-out infinite;top:0;left:0;z-index:1}
   </style>
 </head>
 <body>
@@ -154,10 +104,10 @@
     </button>
     <div class="collapse navbar-collapse" id="navMenu">
       <ul class="navbar-nav mx-auto gap-1">
-        <li class="nav-item"><a class="nav-link active" href="#" onclick="showPage('map',this)"><i class="bi bi-map me-1"></i>Live Map</a></li>
-        <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('report',this)"><i class="bi bi-plus-circle me-1"></i>Report Issue</a></li>
-        <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('myreports',this)"><i class="bi bi-person-lines-fill me-1"></i>My Reports</a></li>
-        <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('dashboard',this)"><i class="bi bi-bar-chart-line me-1"></i>Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link active" href="#" onclick="showPage('map',this)"><i class="bi bi-map me-1"></i><span data-i18n="navMap">Live Map</span></a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('report',this)"><i class="bi bi-plus-circle me-1"></i><span data-i18n="navReport">Report Issue</span></a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('myreports',this)"><i class="bi bi-person-lines-fill me-1"></i><span data-i18n="navMy">My Reports</span></a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('dashboard',this)"><i class="bi bi-bar-chart-line me-1"></i><span data-i18n="navDash">Dashboard</span></a></li>
       </ul>
       <div class="d-flex gap-2 align-items-center">
         <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
@@ -167,208 +117,120 @@
   </div>
 </nav>
 
-<!-- ═══════════════════════════════════════════════ MAP PAGE -->
+<!-- MAP PAGE -->
 <div id="page-map" class="page active container-fluid py-4 px-3 px-md-4">
-
   <div class="mb-3">
     <h4 class="fw-bold mb-1" data-i18n="mapTitle">🗺️ Live Issue Map</h4>
     <p class="text-muted-custom small" data-i18n="mapSub">Real-time community reports — Nairobi Metro</p>
   </div>
-
-  <!-- Stats row -->
   <div class="row g-3 mb-4">
     <div class="col-6 col-md-3"><div class="stat-card"><div class="stat-num text-accent" id="stat-total">6</div><div class="stat-label" data-i18n="statTotal">Total Reports</div></div></div>
     <div class="col-6 col-md-3"><div class="stat-card"><div class="stat-num" style="color:var(--green)" id="stat-onchain">6</div><div class="stat-label" data-i18n="statChain">On-Chain</div></div></div>
     <div class="col-6 col-md-3"><div class="stat-card"><div class="stat-num" style="color:var(--yellow)">12</div><div class="stat-label" data-i18n="statComm">Communities</div></div></div>
     <div class="col-6 col-md-3"><div class="stat-card"><div class="stat-num" style="color:var(--orange)" id="stat-resolved">1</div><div class="stat-label" data-i18n="statRes">Resolved</div></div></div>
   </div>
-
-  <!-- SVG Map -->
-  <div class="map-wrap mb-4">
-    <svg id="map-svg" viewBox="0 0 700 420" width="100%" style="display:block;min-height:260px">
-      <rect width="700" height="420" fill="#09111d"/>
-      <!-- grid -->
-      <g stroke="#0d1e30" stroke-width="0.5">
-        <line x1="0" y1="70" x2="700" y2="70"/><line x1="0" y1="140" x2="700" y2="140"/>
-        <line x1="0" y1="210" x2="700" y2="210"/><line x1="0" y1="280" x2="700" y2="280"/>
-        <line x1="0" y1="350" x2="700" y2="350"/>
-        <line x1="100" y1="0" x2="100" y2="420"/><line x1="200" y1="0" x2="200" y2="420"/>
-        <line x1="300" y1="0" x2="300" y2="420"/><line x1="400" y1="0" x2="400" y2="420"/>
-        <line x1="500" y1="0" x2="500" y2="420"/><line x1="600" y1="0" x2="600" y2="420"/>
-      </g>
-      <!-- roads -->
-      <line x1="50" y1="210" x2="650" y2="210" stroke="#1a3050" stroke-width="4"/>
-      <line x1="350" y1="30" x2="350" y2="390" stroke="#1a3050" stroke-width="4"/>
-      <line x1="50" y1="130" x2="650" y2="310" stroke="#152538" stroke-width="2.5"/>
-      <line x1="650" y1="130" x2="50" y2="320" stroke="#152538" stroke-width="2"/>
-      <!-- area labels -->
-      <text x="80" y="75" fill="#1a3050" font-size="11" font-family="JetBrains Mono">PARKLANDS</text>
-      <text x="370" y="75" fill="#1a3050" font-size="11" font-family="JetBrains Mono">EASTLEIGH</text>
-      <text x="480" y="195" fill="#1a3050" font-size="11" font-family="JetBrains Mono">WESTLANDS</text>
-      <text x="80" y="340" fill="#1a3050" font-size="11" font-family="JetBrains Mono">KIBERA</text>
-      <text x="370" y="360" fill="#1a3050" font-size="11" font-family="JetBrains Mono">LANGATA</text>
-      <text x="230" y="195" fill="#1e3d5a" font-size="14" font-family="JetBrains Mono" font-weight="600">CBD</text>
-      <!-- pins rendered by JS -->
-      <g id="map-pins"></g>
-    </svg>
-    <div class="map-legend">
-      <div class="d-flex gap-3 flex-wrap">
-        <span>🕳️ Pothole</span><span>🚦 Traffic</span><span>⚡ Electric</span><span>💧 Water</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Recent reports -->
+  <!-- REAL LEAFLET MAP -->
+  <div id="leaflet-map" class="mb-4"></div>
   <div class="card">
-    <div class="card-header px-3 py-2" data-i18n="recentReports">Recent Reports</div>
-    <div class="card-body p-0">
-      <div id="recent-list"></div>
-    </div>
+    <div class="card-header px-3 py-2" data-i18n="recentTitle">Recent Reports</div>
+    <div class="card-body p-0" id="recent-list"></div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════ REPORT PAGE -->
+<!-- REPORT PAGE -->
 <div id="page-report" class="page container py-4 px-3" style="max-width:580px">
-
   <h4 class="fw-bold mb-1" data-i18n="reportTitle">📋 Report an Issue</h4>
   <p class="text-muted-custom small mb-4" data-i18n="reportSub">Your report goes permanently on-chain.</p>
-
-  <!-- Step dots -->
-  <div class="steps" id="step-dots">
-    <div class="step-dot done" id="dot1"></div>
-    <div class="step-dot" id="dot2"></div>
-    <div class="step-dot" id="dot3"></div>
-    <div class="step-dot" id="dot4"></div>
+  <div class="steps">
+    <div class="step-dot done" id="dot1"></div><div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div><div class="step-dot" id="dot4"></div>
   </div>
-
   <div id="form-area">
-
-    <!-- STEP 1: Category -->
+    <!-- Step 1 -->
     <div class="mb-4">
       <div class="form-label" data-i18n="step1">01 — Select Issue Type</div>
       <div class="row g-2">
-        <div class="col-6 col-md-3">
-          <div class="cat-card" onclick="selectCat('pothole',this)">
-            <div class="cat-icon">🕳️</div>
-            <div class="cat-label" data-i18n="catPothole">Pothole / Road</div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="cat-card" onclick="selectCat('traffic',this)">
-            <div class="cat-icon">🚦</div>
-            <div class="cat-label" data-i18n="catTraffic">Broken Traffic Light</div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="cat-card" onclick="selectCat('electric',this)">
-            <div class="cat-icon">⚡</div>
-            <div class="cat-label" data-i18n="catElectric">Electrical Outage</div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="cat-card" onclick="selectCat('water',this)">
-            <div class="cat-icon">💧</div>
-            <div class="cat-label" data-i18n="catWater">Water / Sanitation</div>
-          </div>
-        </div>
+        <div class="col-6 col-md-3"><div class="cat-card" onclick="selectCat('pothole',this)"><div class="cat-icon">🕳️</div><div class="cat-label" data-i18n="catPothole">Pothole / Road</div></div></div>
+        <div class="col-6 col-md-3"><div class="cat-card" onclick="selectCat('traffic',this)"><div class="cat-icon">🚦</div><div class="cat-label" data-i18n="catTraffic">Traffic Light</div></div></div>
+        <div class="col-6 col-md-3"><div class="cat-card" onclick="selectCat('electric',this)"><div class="cat-icon">⚡</div><div class="cat-label" data-i18n="catElectric">Electrical Outage</div></div></div>
+        <div class="col-6 col-md-3"><div class="cat-card" onclick="selectCat('water',this)"><div class="cat-icon">💧</div><div class="cat-label" data-i18n="catWater">Water / Sanitation</div></div></div>
       </div>
     </div>
-
-    <!-- STEP 2: Photo -->
+    <!-- Step 2: REAL GPS -->
     <div class="mb-4" id="step2-area" style="display:none">
       <div class="form-label" data-i18n="step2">02 — Capture Photo + Location</div>
-      <div class="photo-zone" id="photo-zone" onclick="capturePhoto()">
-        <i class="bi bi-camera fs-3 d-block mb-2"></i>
-        <span data-i18n="photoBtn">📷 Tap to Take / Upload Photo</span>
+      <div class="gps-zone" id="gps-zone" onclick="captureGPS()">
+        <i class="bi bi-geo-alt fs-3 d-block mb-2"></i>
+        <div id="gps-label" data-i18n="gpsBtn">📍 Tap to Get Your Location</div>
+        <div class="small mt-1" id="gps-sub" style="color:var(--muted)" data-i18n="gpsSub">This will use your device GPS</div>
+      </div>
+      <div id="accuracy-display" style="display:none" class="mt-2 px-1">
+        <div class="d-flex justify-content-between small mb-1">
+          <span class="text-muted-custom" data-i18n="accuracyLabel">GPS Accuracy</span>
+          <span id="accuracy-text" class="mono"></span>
+        </div>
+        <div class="accuracy-bar"><div class="accuracy-fill" id="accuracy-fill"></div></div>
       </div>
     </div>
-
-    <!-- STEP 3: Description -->
+    <!-- Step 3 -->
     <div class="mb-4" id="step3-area" style="display:none">
       <div class="form-label" data-i18n="step3">03 — Add Description (Optional)</div>
-      <textarea class="form-control" id="desc-input" rows="3" data-i18n-placeholder="descPlaceholder" placeholder="Describe what you see…"></textarea>
+      <textarea class="form-control" id="desc-input" rows="3" placeholder="Describe what you see…" data-i18n-placeholder="descPlaceholder"></textarea>
     </div>
-
-    <!-- STEP 4: Submit -->
+    <!-- Step 4 -->
     <div id="step4-area" style="display:none">
       <div class="form-label" data-i18n="step4">04 — Submit to Blockchain</div>
       <div class="card mb-3">
         <div class="card-body py-2 px-3">
-          <div class="d-flex justify-content-between small mb-1">
-            <span class="text-muted-custom">Network</span>
-            <span style="color:var(--yellow)" class="mono">Polygon Mumbai Testnet</span>
-          </div>
-          <div class="d-flex justify-content-between small mb-1">
-            <span class="text-muted-custom">Storage</span>
-            <span style="color:var(--green)" class="mono">IPFS + On-chain hash</span>
-          </div>
-          <div class="d-flex justify-content-between small">
-            <span class="text-muted-custom">Gas Fee</span>
-            <span class="text-accent mono">~$0.001 (sponsored)</span>
-          </div>
+          <div class="d-flex justify-content-between small mb-1"><span class="text-muted-custom">Network</span><span style="color:var(--yellow)" class="mono">Polygon Mumbai Testnet</span></div>
+          <div class="d-flex justify-content-between small mb-1"><span class="text-muted-custom">Storage</span><span style="color:var(--green)" class="mono">IPFS + On-chain hash</span></div>
+          <div class="d-flex justify-content-between small"><span class="text-muted-custom">Gas Fee</span><span class="text-accent mono">~$0.001 (sponsored)</span></div>
         </div>
       </div>
-      <button class="btn btn-primary w-100 py-3" id="submit-btn" onclick="submitReport()" data-i18n="submitBtn">
-        <i class="bi bi-box-arrow-up me-2"></i>Submit to Blockchain
+      <button class="btn btn-primary w-100 py-3" id="submit-btn" onclick="submitReport()">
+        <i class="bi bi-box-arrow-up me-2"></i><span data-i18n="submitBtn">Submit to Blockchain</span>
       </button>
     </div>
-
   </div>
-
-  <!-- SUCCESS STATE -->
+  <!-- SUCCESS -->
   <div id="success-area" style="display:none" class="chain-anim">
     <div class="success-box mb-4">
       <div style="font-size:2.5rem" class="mb-2">✅</div>
       <h5 class="fw-bold" style="color:var(--green)" data-i18n="successTitle">Report recorded on blockchain!</h5>
       <span class="badge badge-chain mt-1" data-i18n="badgeChain">✓ ON-CHAIN</span>
     </div>
-    <div class="mb-2">
-      <div class="form-label" data-i18n="txLabel">Transaction Hash</div>
-      <div class="hash-box" id="result-tx"></div>
-    </div>
-    <div class="mb-2">
-      <div class="form-label" data-i18n="blockLabel">Block</div>
-      <div class="hash-box" id="result-block"></div>
-    </div>
-    <div class="mb-2">
-      <div class="form-label" data-i18n="ipfsLabel">IPFS Photo Hash</div>
-      <div class="hash-box" id="result-ipfs"></div>
-    </div>
-    <div class="mb-4">
-      <div class="form-label" data-i18n="timeLabel">Timestamp</div>
-      <div class="hash-box" id="result-time"></div>
-    </div>
+    <div class="mb-2"><div class="form-label" data-i18n="txLabel">Transaction Hash</div><div class="hash-box" id="result-tx"></div></div>
+    <div class="mb-2"><div class="form-label" data-i18n="blockLabel">Block</div><div class="hash-box" id="result-block"></div></div>
+    <div class="mb-2"><div class="form-label" data-i18n="ipfsLabel">IPFS Photo Hash</div><div class="hash-box" id="result-ipfs"></div></div>
+    <div class="mb-2"><div class="form-label">GPS Coordinates</div><div class="hash-box" id="result-gps"></div></div>
+    <div class="mb-4"><div class="form-label" data-i18n="timeLabel">Timestamp</div><div class="hash-box" id="result-time"></div></div>
     <button class="btn btn-outline-secondary w-100" onclick="resetForm()">
       <i class="bi bi-arrow-left me-2"></i><span data-i18n="backMap">Back to Map</span>
     </button>
   </div>
-
 </div>
 
-<!-- ═══════════════════════════════════════════════ MY REPORTS PAGE -->
+<!-- MY REPORTS -->
 <div id="page-myreports" class="page container py-4 px-3" style="max-width:680px">
   <h4 class="fw-bold mb-1" data-i18n="myTitle">👤 My Reports</h4>
   <p class="text-muted-custom small mb-4" data-i18n="mySub">Your contribution to community data.</p>
   <div id="my-reports-list">
-    <div class="text-center text-muted-custom py-5">
-      <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-      <span data-i18n="myEmpty">No reports yet — submit your first report!</span>
-    </div>
+    <div class="text-center text-muted-custom py-5"><i class="bi bi-inbox fs-2 d-block mb-2"></i><span data-i18n="myEmpty">No reports yet — submit your first report!</span></div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════ DASHBOARD PAGE -->
+<!-- DASHBOARD -->
 <div id="page-dashboard" class="page container-fluid py-4 px-3 px-md-4">
   <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
     <div>
       <h4 class="fw-bold mb-1" data-i18n="dashTitle">📊 Public Dashboard</h4>
       <p class="text-muted-custom small" data-i18n="dashSub">Open, immutable and verifiable by anyone.</p>
     </div>
-    <div class="d-flex gap-2 align-items-center flex-wrap">
-      <select class="form-select form-select-sm" style="width:auto" id="filter-select" onchange="filterTable()">
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+      <select class="form-select form-select-sm" style="width:auto" id="filter-select" onchange="renderTable()">
         <option value="all" data-i18n="filterAll">All Issues</option>
         <option value="pothole" data-i18n="catPothole">Pothole / Road</option>
-        <option value="traffic" data-i18n="catTraffic">Broken Traffic Light</option>
+        <option value="traffic" data-i18n="catTraffic">Traffic Light</option>
         <option value="electric" data-i18n="catElectric">Electrical Outage</option>
         <option value="water" data-i18n="catWater">Water / Sanitation</option>
       </select>
@@ -377,70 +239,33 @@
       </button>
     </div>
   </div>
-
-  <!-- Category breakdown -->
   <div class="row g-3 mb-4">
-    <div class="col-6 col-lg-3">
-      <div class="card p-3">
-        <div class="d-flex align-items-center gap-2 mb-2"><span style="font-size:1.4rem">🕳️</span><span class="small text-muted-custom" data-i18n="catPothole">Pothole / Road</span></div>
-        <div class="stat-num" style="color:var(--orange);font-size:1.5rem" id="cat-pothole-count">2</div>
-        <div class="progress mt-2"><div class="progress-bar" style="background:var(--orange);width:33%" id="bar-pothole"></div></div>
-      </div>
-    </div>
-    <div class="col-6 col-lg-3">
-      <div class="card p-3">
-        <div class="d-flex align-items-center gap-2 mb-2"><span style="font-size:1.4rem">🚦</span><span class="small text-muted-custom" data-i18n="catTraffic">Traffic Light</span></div>
-        <div class="stat-num" style="color:var(--yellow);font-size:1.5rem" id="cat-traffic-count">1</div>
-        <div class="progress mt-2"><div class="progress-bar" style="background:var(--yellow);width:16%" id="bar-traffic"></div></div>
-      </div>
-    </div>
-    <div class="col-6 col-lg-3">
-      <div class="card p-3">
-        <div class="d-flex align-items-center gap-2 mb-2"><span style="font-size:1.4rem">⚡</span><span class="small text-muted-custom" data-i18n="catElectric">Electric</span></div>
-        <div class="stat-num" style="color:var(--green);font-size:1.5rem" id="cat-electric-count">2</div>
-        <div class="progress mt-2"><div class="progress-bar" style="background:var(--green);width:33%" id="bar-electric"></div></div>
-      </div>
-    </div>
-    <div class="col-6 col-lg-3">
-      <div class="card p-3">
-        <div class="d-flex align-items-center gap-2 mb-2"><span style="font-size:1.4rem">💧</span><span class="small text-muted-custom" data-i18n="catWater">Water / Sanitation</span></div>
-        <div class="stat-num" style="color:var(--blue);font-size:1.5rem" id="cat-water-count">1</div>
-        <div class="progress mt-2"><div class="progress-bar" style="background:var(--blue);width:16%" id="bar-water"></div></div>
-      </div>
-    </div>
+    <div class="col-6 col-lg-3"><div class="card p-3"><div class="d-flex align-items-center gap-2 mb-2"><span style="font-size:1.4rem">🕳️</span><span class="small text-muted-custom" data-i18n="catPothole">Pothole</span></div><div class="stat-num" style="color:var(--orange);font-size:1.5rem" id="cat-pothole-count">2</div><div class="progress mt-2"><div class="progress-bar" style="background:var(--orange)" id="bar-pothole"></div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card p-3"><div class="d-flex align-items-center gap-2 mb-2"><span style="font-size:1.4rem">🚦</span><span class="small text-muted-custom" data-i18n="catTraffic">Traffic</span></div><div class="stat-num" style="color:var(--yellow);font-size:1.5rem" id="cat-traffic-count">1</div><div class="progress mt-2"><div class="progress-bar" style="background:var(--yellow)" id="bar-traffic"></div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card p-3"><div class="d-flex align-items-center gap-2 mb-2"><span style="font-size:1.4rem">⚡</span><span class="small text-muted-custom" data-i18n="catElectric">Electric</span></div><div class="stat-num" style="color:var(--green);font-size:1.5rem" id="cat-electric-count">2</div><div class="progress mt-2"><div class="progress-bar" style="background:var(--green)" id="bar-electric"></div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card p-3"><div class="d-flex align-items-center gap-2 mb-2"><span style="font-size:1.4rem">💧</span><span class="small text-muted-custom" data-i18n="catWater">Water</span></div><div class="stat-num" style="color:var(--blue);font-size:1.5rem" id="cat-water-count">1</div><div class="progress mt-2"><div class="progress-bar" style="background:var(--blue)" id="bar-water"></div></div></div></div>
   </div>
-
-  <!-- Table -->
   <div class="card">
     <div class="card-body p-0" style="overflow-x:auto">
       <table class="report-table">
-        <thead>
-          <tr>
-            <th data-i18n="colType">Type</th>
-            <th data-i18n="colArea">Location</th>
-            <th data-i18n="colTx">TX Hash</th>
-            <th data-i18n="colStatus">Status</th>
-            <th data-i18n="colTime">Date</th>
-          </tr>
-        </thead>
+        <thead><tr>
+          <th data-i18n="colType">Type</th><th data-i18n="colArea">Location</th>
+          <th data-i18n="colGPS">GPS</th><th data-i18n="colTx">TX Hash</th>
+          <th data-i18n="colStatus">Status</th><th data-i18n="colTime">Date</th>
+        </tr></thead>
         <tbody id="report-table-body"></tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════ DETAIL MODAL -->
+<!-- DETAIL MODAL -->
 <div class="modal fade" id="detailModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title fw-bold" id="modal-title">Report Detail</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+      <div class="modal-header"><h5 class="modal-title fw-bold" id="modal-title"></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body" id="modal-body"></div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button></div>
     </div>
   </div>
 </div>
@@ -448,374 +273,393 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 <script>
 // ── i18n ──────────────────────────────────────────────────────
-const LANG = {
-  en: {
-    mapTitle:"🗺️ Live Issue Map", mapSub:"Real-time community reports — Nairobi Metro",
-    statTotal:"Total Reports", statChain:"On-Chain", statComm:"Communities", statRes:"Resolved",
-    recentReports:"Recent Reports",
-    reportTitle:"📋 Report an Issue", reportSub:"Your report goes permanently on-chain.",
-    step1:"01 — Select Issue Type", step2:"02 — Capture Photo + Location",
-    step3:"03 — Add Description (Optional)", step4:"04 — Submit to Blockchain",
-    photoBtn:"📷 Tap to Take / Upload Photo", photoDone:"📸 Photo captured & GPS locked",
+const LANG={
+  en:{
+    navMap:"Live Map",navReport:"Report Issue",navMy:"My Reports",navDash:"Dashboard",
+    mapTitle:"🗺️ Live Issue Map",mapSub:"Real-time community reports — Nairobi Metro",
+    statTotal:"Total Reports",statChain:"On-Chain",statComm:"Communities",statRes:"Resolved",
+    recentTitle:"Recent Reports",
+    reportTitle:"📋 Report an Issue",reportSub:"Your report goes permanently on-chain.",
+    step1:"01 — Select Issue Type",step2:"02 — Capture Photo + Location",
+    step3:"03 — Add Description (Optional)",step4:"04 — Submit to Blockchain",
+    gpsBtn:"📍 Tap to Get Your Location",gpsSub:"This will use your device GPS",
+    gpsLocating:"Getting your location…",gpsDone:"✅ Location captured",
+    gpsFailed:"⚠️ GPS unavailable — using Nairobi fallback",
+    accuracyLabel:"GPS Accuracy",
     descPlaceholder:"Describe what you see…",
-    submitBtn:"Submit to Blockchain", submitting:"Writing to chain…",
-    successTitle:"Report recorded on blockchain!", badgeChain:"✓ ON-CHAIN",
-    txLabel:"Transaction Hash", blockLabel:"Block", ipfsLabel:"IPFS Photo Hash", timeLabel:"Timestamp",
+    submitBtn:"Submit to Blockchain",submitting:"Writing to chain…",
+    successTitle:"Report recorded on blockchain!",badgeChain:"✓ ON-CHAIN",
+    txLabel:"Transaction Hash",blockLabel:"Block",ipfsLabel:"IPFS Photo Hash",timeLabel:"Timestamp",
     backMap:"Back to Map",
-    myTitle:"👤 My Reports", mySub:"Your contribution to community data.", myEmpty:"No reports yet — submit your first report!",
-    dashTitle:"📊 Public Dashboard", dashSub:"Open, immutable and verifiable by anyone.",
-    filterAll:"All Issues", exportBtn:"Export CSV",
-    colType:"Type", colArea:"Location", colTx:"TX Hash", colStatus:"Status", colTime:"Date",
-    catPothole:"Pothole / Road", catTraffic:"Broken Traffic Light", catElectric:"Electrical Outage", catWater:"Water / Sanitation",
-    statusOpen:"Open", statusInProgress:"In Progress", statusResolved:"Resolved",
-    badgeNew:"NEW",
+    myTitle:"👤 My Reports",mySub:"Your contribution to community data.",myEmpty:"No reports yet — submit your first report!",
+    dashTitle:"📊 Public Dashboard",dashSub:"Open, immutable and verifiable by anyone.",
+    filterAll:"All Issues",exportBtn:"Export CSV",
+    colType:"Type",colArea:"Location",colGPS:"GPS",colTx:"TX Hash",colStatus:"Status",colTime:"Date",
+    catPothole:"Pothole / Road",catTraffic:"Broken Traffic Light",catElectric:"Electrical Outage",catWater:"Water / Sanitation",
+    statusOpen:"Open",statusInProgress:"In Progress",statusResolved:"Resolved",
+    badgeNew:"NEW",badgeVerified:"✓ ON-CHAIN",
   },
-  sw: {
-    mapTitle:"🗺️ Ramani ya Masuala", mapSub:"Ripoti za jamii za wakati halisi — Nairobi",
-    statTotal:"Ripoti Zote", statChain:"Mnyororo", statComm:"Jamii", statRes:"Zilizoshughulikiwa",
-    recentReports:"Ripoti za Hivi Karibuni",
-    reportTitle:"📋 Ripoti Tatizo", reportSub:"Ripoti yako inarekodiwa kwenye blockchain.",
-    step1:"01 — Chagua Aina ya Tatizo", step2:"02 — Piga Picha + Mahali",
-    step3:"03 — Ongeza Maelezo (Si Lazima)", step4:"04 — Wasilisha kwenye Blockchain",
-    photoBtn:"📷 Bonyeza Kupiga / Kupakia Picha", photoDone:"📸 Picha imechukuliwa na GPS imewekwa",
+  sw:{
+    navMap:"Ramani",navReport:"Ripoti Tatizo",navMy:"Ripoti Zangu",navDash:"Dashibodi",
+    mapTitle:"🗺️ Ramani ya Masuala",mapSub:"Ripoti za jamii za wakati halisi — Nairobi",
+    statTotal:"Ripoti Zote",statChain:"Mnyororo",statComm:"Jamii",statRes:"Zilizoshughulikiwa",
+    recentTitle:"Ripoti za Hivi Karibuni",
+    reportTitle:"📋 Ripoti Tatizo",reportSub:"Ripoti yako inarekodiwa kwenye blockchain.",
+    step1:"01 — Chagua Aina ya Tatizo",step2:"02 — Piga Picha + Mahali",
+    step3:"03 — Ongeza Maelezo (Si Lazima)",step4:"04 — Wasilisha kwenye Blockchain",
+    gpsBtn:"📍 Bonyeza Kupata Mahali Pako",gpsSub:"Itatumia GPS ya kifaa chako",
+    gpsLocating:"Inapata mahali pako…",gpsDone:"✅ Mahali pamepatikana",
+    gpsFailed:"⚠️ GPS haipo — inatumia mahali mbadala",
+    accuracyLabel:"Usahihi wa GPS",
     descPlaceholder:"Elezea unachokiona…",
-    submitBtn:"Wasilisha kwenye Blockchain", submitting:"Inaandikwa kwenye mnyororo…",
-    successTitle:"Ripoti imerekodiwa kwenye blockchain!", badgeChain:"✓ MNYORORO",
-    txLabel:"Hash ya Muamala", blockLabel:"Kizuizi", ipfsLabel:"Hash ya Picha IPFS", timeLabel:"Muda",
+    submitBtn:"Wasilisha kwenye Blockchain",submitting:"Inaandikwa kwenye mnyororo…",
+    successTitle:"Ripoti imerekodiwa kwenye blockchain!",badgeChain:"✓ MNYORORO",
+    txLabel:"Hash ya Muamala",blockLabel:"Kizuizi",ipfsLabel:"Hash ya Picha IPFS",timeLabel:"Muda",
     backMap:"Rudi Ramani",
-    myTitle:"👤 Ripoti Zangu", mySub:"Mchango wako kwa data ya jamii.", myEmpty:"Bado hakuna ripoti. Wasilisha ripoti yako ya kwanza!",
-    dashTitle:"📊 Dashibodi ya Umma", dashSub:"Data yote iko wazi na haibadiliki.",
-    filterAll:"Masuala Yote", exportBtn:"Hamisha CSV",
-    colType:"Aina", colArea:"Mahali", colTx:"Hash ya TX", colStatus:"Hali", colTime:"Tarehe",
-    catPothole:"Shimo / Barabara", catTraffic:"Taa Iliyovunjika", catElectric:"Kukatika kwa Umeme", catWater:"Maji / Usafi",
-    statusOpen:"Wazi", statusInProgress:"Inaendelea", statusResolved:"Imeshughulikiwa",
-    badgeNew:"MPYA",
+    myTitle:"👤 Ripoti Zangu",mySub:"Mchango wako kwa data ya jamii.",myEmpty:"Bado hakuna ripoti. Wasilisha ripoti yako ya kwanza!",
+    dashTitle:"📊 Dashibodi ya Umma",dashSub:"Data yote iko wazi na haibadiliki.",
+    filterAll:"Masuala Yote",exportBtn:"Hamisha CSV",
+    colType:"Aina",colArea:"Mahali",colGPS:"GPS",colTx:"Hash TX",colStatus:"Hali",colTime:"Tarehe",
+    catPothole:"Shimo / Barabara",catTraffic:"Taa Iliyovunjika",catElectric:"Kukatika kwa Umeme",catWater:"Maji / Usafi",
+    statusOpen:"Wazi",statusInProgress:"Inaendelea",statusResolved:"Imeshughulikiwa",
+    badgeNew:"MPYA",badgeVerified:"✓ MNYORORO",
   }
 };
-let currentLang = 'en';
-function t(key) { return LANG[currentLang][key] || key; }
-
-function setLang(l) {
-  currentLang = l;
-  document.getElementById('btn-en').classList.toggle('active', l==='en');
-  document.getElementById('btn-sw').classList.toggle('active', l==='sw');
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const k = el.getAttribute('data-i18n');
-    if (LANG[l][k]) el.textContent = LANG[l][k];
-  });
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    const k = el.getAttribute('data-i18n-placeholder');
-    if (LANG[l][k]) el.placeholder = LANG[l][k];
-  });
-  renderAll();
+let currentLang='en';
+function t(k){return LANG[currentLang][k]||k}
+function setLang(l){
+  currentLang=l;
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  document.getElementById('btn-sw').classList.toggle('active',l==='sw');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(LANG[l][k])el.textContent=LANG[l][k]});
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const k=el.getAttribute('data-i18n-placeholder');if(LANG[l][k])el.placeholder=LANG[l][k]});
+  renderRecent();renderTable();renderMyReports();
+  if(map)renderMapMarkers();
 }
 
-// ── Data ─────────────────────────────────────────────────────
-const mockTx   = () => "0x" + [...Array(64)].map(()=>Math.floor(Math.random()*16).toString(16)).join("");
-const mockIpfs = () => "Qm" + [...Array(44)].map(()=>"ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789"[Math.floor(Math.random()*58)]).join("");
-const mockBlock= () => 18000000 + Math.floor(Math.random()*500000);
+// ── Mock blockchain ───────────────────────────────────────────
+const mockTx=()=>"0x"+[...Array(64)].map(()=>Math.floor(Math.random()*16).toString(16)).join("");
+const mockIpfs=()=>"Qm"+[...Array(44)].map(()=>"ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789"[Math.floor(Math.random()*58)]).join("");
+const mockBlock=()=>18000000+Math.floor(Math.random()*500000);
 
-const CAT_ICONS  = {pothole:"🕳️", traffic:"🚦", electric:"⚡", water:"💧"};
-const CAT_COLORS = {pothole:"#FF6B35", traffic:"#FFD166", electric:"#00e5a0", water:"#118AB2"};
-const STATUS_COLORS = {open:"#FF6B35", inProgress:"#FFD166", resolved:"#00e5a0"};
+// ── Data — real Nairobi GPS coords ────────────────────────────
+const CAT_ICONS={pothole:"🕳️",traffic:"🚦",electric:"⚡",water:"💧"};
+const CAT_COLORS={pothole:"#FF6B35",traffic:"#FFD166",electric:"#00e5a0",water:"#118AB2"};
 
-// Map pin positions [x,y in SVG coords]
-const PIN_COORDS = [
-  {id:1, type:"pothole",  x:335, y:215, area:"CBD",       desc:"Large pothole near bus stop causing accidents", status:"open"},
-  {id:2, type:"electric", x:260, y:200, area:"Westlands",  desc:"Transformer blown — 3 days no power",          status:"inProgress"},
-  {id:3, type:"water",    x:430, y:165, area:"Eastleigh",  desc:"Sewage overflow on main road",                  status:"open"},
-  {id:4, type:"traffic",  x:280, y:310, area:"Kibera",     desc:"Traffic lights off at major intersection",      status:"resolved"},
-  {id:5, type:"pothole",  x:200, y:130, area:"Parklands",  desc:"Road collapsed after heavy rain",               status:"open"},
-  {id:6, type:"electric", x:400, y:320, area:"Langata",    desc:"Exposed wires near school",                     status:"inProgress"},
+let reports=[
+  {id:1,type:"pothole", lat:-1.2866,lng:36.8164,area:"CBD",        desc:"Large pothole near bus stop",          status:"open",       tx:mockTx(),block:mockBlock(),ipfs:mockIpfs(),time:"2025-03-01 08:14",reporter:"0xa1b2c3d4e5f6",isNew:false},
+  {id:2,type:"electric",lat:-1.2674,lng:36.8095,area:"Westlands",  desc:"Transformer blown — 3 days no power", status:"inProgress", tx:mockTx(),block:mockBlock(),ipfs:mockIpfs(),time:"2025-03-02 14:32",reporter:"0xe5f6a7b8c9d0",isNew:false},
+  {id:3,type:"water",   lat:-1.2760,lng:36.8511,area:"Eastleigh",  desc:"Sewage overflow on main road",         status:"open",       tx:mockTx(),block:mockBlock(),ipfs:mockIpfs(),time:"2025-03-03 09:05",reporter:"0xf1e2d3c4b5a6",isNew:false},
+  {id:4,type:"traffic", lat:-1.3148,lng:36.7920,area:"Kibera",     desc:"Traffic lights off at intersection",   status:"resolved",   tx:mockTx(),block:mockBlock(),ipfs:mockIpfs(),time:"2025-03-04 16:20",reporter:"0x1a2b3c4d5e6f",isNew:false},
+  {id:5,type:"pothole", lat:-1.2580,lng:36.8200,area:"Parklands",  desc:"Road collapsed after heavy rain",      status:"open",       tx:mockTx(),block:mockBlock(),ipfs:mockIpfs(),time:"2025-03-05 11:47",reporter:"0x7f8e9d0c1b2a",isNew:false},
+  {id:6,type:"electric",lat:-1.3220,lng:36.7830,area:"Langata",    desc:"Exposed wires near primary school",    status:"inProgress", tx:mockTx(),block:mockBlock(),ipfs:mockIpfs(),time:"2025-03-06 07:30",reporter:"0x3c4d5e6f7a8b",isNew:false},
 ];
+let myReports=[];
 
-let reports = PIN_COORDS.map(r => ({
-  ...r,
-  tx:    mockTx(),
-  block: mockBlock(),
-  ipfs:  mockIpfs(),
-  time:  `2025-03-0${r.id} ${String(7+r.id).padStart(2,'0')}:${String(10+r.id*7).padStart(2,'0')}`,
-  reporter: "0x"+[...Array(8)].map(()=>Math.floor(Math.random()*16).toString(16)).join(""),
-  isNew: false,
-}));
+// ── GPS state ─────────────────────────────────────────────────
+let capturedLat=null,capturedLng=null,capturedAccuracy=null;
 
-let myReports = [];
+// ── Leaflet ───────────────────────────────────────────────────
+let map=null,mapMarkers=[];
 
-// ── Navigation ───────────────────────────────────────────────
-function showPage(name, linkEl) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+function initMap(){
+  if(map)return;
+  map=L.map('leaflet-map',{center:[-1.2921,36.8219],zoom:13});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',maxZoom:19
+  }).addTo(map);
+  renderMapMarkers();
+}
+
+function makeIcon(type,status){
+  const c=CAT_COLORS[type];
+  const pulse=status==='open'?`<div class="marker-pulse" style="background:${c}"></div>`:'';
+  return L.divIcon({
+    className:'',
+    html:`<div style="position:relative;width:32px;height:32px">${pulse}<div class="civic-marker" style="background:${c}">${CAT_ICONS[type]}</div></div>`,
+    iconSize:[32,32],iconAnchor:[16,16],popupAnchor:[0,-20]
+  });
+}
+
+function buildPopup(r){
+  const sc=r.status==='open'?'badge-open':r.status==='inProgress'?'badge-inprogress':'badge-resolved';
+  const sl=t('status'+r.status.charAt(0).toUpperCase()+r.status.slice(1));
+  return `<div style="font-family:'Space Grotesk',sans-serif;font-size:13px;min-width:210px">
+    <div style="font-weight:700;margin-bottom:5px">${CAT_ICONS[r.type]} ${t('cat'+r.type.charAt(0).toUpperCase()+r.type.slice(1))}</div>
+    <div style="color:#4a7a9b;font-size:11px;margin-bottom:8px">${r.desc}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
+      <span class="badge ${sc} rounded-pill" style="font-size:10px">${sl}</span>
+      <span class="badge badge-chain rounded-pill">${t('badgeVerified')}</span>
+    </div>
+    <div style="color:#4a7a9b;font-size:10px">${r.area} · ${r.time}</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#2a6a8a;margin-top:3px">${r.tx.slice(0,26)}…</div>
+  </div>`;
+}
+
+function renderMapMarkers(){
+  if(!map)return;
+  mapMarkers.forEach(m=>map.removeLayer(m));
+  mapMarkers=[];
+  reports.forEach(r=>{
+    const m=L.marker([r.lat,r.lng],{icon:makeIcon(r.type,r.status)});
+    m.bindPopup(buildPopup(r),{maxWidth:280});
+    m.on('click',()=>openDetail(r.id));
+    m.addTo(map);
+    mapMarkers.push(m);
+  });
+}
+
+// ── Navigation ────────────────────────────────────────────────
+function showPage(name,linkEl){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
-  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-  if (linkEl) linkEl.classList.add('active');
-  renderAll();
-  // close mobile nav
-  const menu = document.getElementById('navMenu');
-  if (menu.classList.contains('show')) {
-    document.querySelector('.navbar-toggler').click();
-  }
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  if(linkEl)linkEl.classList.add('active');
+  if(name==='map'){setTimeout(()=>{initMap();renderMapMarkers();map&&map.invalidateSize();},120)}
+  if(name==='report')resetForm();
+  renderRecent();renderStats();renderTable();renderMyReports();
+  const menu=document.getElementById('navMenu');
+  if(menu.classList.contains('show'))document.querySelector('.navbar-toggler').click();
 }
 
-// ── Render helpers ───────────────────────────────────────────
-function statusBadge(status) {
-  const cls = status==='open'?'badge-open': status==='inProgress'?'badge-inprogress':'badge-resolved';
-  const lbl = t('status'+status.charAt(0).toUpperCase()+status.slice(1));
-  return `<span class="badge ${cls} rounded-pill" style="font-size:.7rem">${lbl}</span>`;
+// ── Render helpers ────────────────────────────────────────────
+function statusBadge(s){
+  const c=s==='open'?'badge-open':s==='inProgress'?'badge-inprogress':'badge-resolved';
+  const l=t('status'+s.charAt(0).toUpperCase()+s.slice(1));
+  return `<span class="badge ${c} rounded-pill" style="font-size:.7rem">${l}</span>`;
 }
+function chainBadge(){return`<span class="badge badge-chain rounded-pill">${t('badgeChain')}</span>`}
+function catLabel(type){return`${CAT_ICONS[type]} ${t('cat'+type.charAt(0).toUpperCase()+type.slice(1))}`}
 
-function chainBadge() {
-  return `<span class="badge badge-chain rounded-pill">${t('badgeChain')}</span>`;
-}
-
-function catLabel(type) {
-  return `${CAT_ICONS[type]} ${t('cat'+type.charAt(0).toUpperCase()+type.slice(1))}`;
-}
-
-// ── Map Pins ─────────────────────────────────────────────────
-function renderMap() {
-  const g = document.getElementById('map-pins');
-  if (!g) return;
-  g.innerHTML = reports.map(r => `
-    <g onclick="openDetail(${r.id})" style="cursor:pointer">
-      <circle cx="${r.x}" cy="${r.y}" r="16" fill="${CAT_COLORS[r.type]}" opacity="0.15"/>
-      <circle cx="${r.x}" cy="${r.y}" r="10" fill="${CAT_COLORS[r.type]}" stroke="#06090f" stroke-width="1.5"/>
-      <text x="${r.x}" y="${r.y+1}" text-anchor="middle" dominant-baseline="middle" font-size="10">${CAT_ICONS[r.type]}</text>
-      ${r.status==='open' ? `
-        <circle cx="${r.x+10}" cy="${r.y-10}" r="4" fill="#FF6B35">
-          <animate attributeName="r" values="3;5;3" dur="2s" repeatCount="indefinite"/>
-          <animate attributeName="opacity" values="1;0.4;1" dur="2s" repeatCount="indefinite"/>
-        </circle>` : ''}
-    </g>
-  `).join('');
-}
-
-// ── Recent list ──────────────────────────────────────────────
-function renderRecent() {
-  const el = document.getElementById('recent-list');
-  if (!el) return;
-  const shown = [...reports].reverse().slice(0,6);
-  el.innerHTML = shown.map(r => `
+function renderRecent(){
+  const el=document.getElementById('recent-list');if(!el)return;
+  el.innerHTML=reports.slice(0,6).map(r=>`
     <div onclick="openDetail(${r.id})" class="d-flex align-items-start gap-3 px-3 py-2 border-bottom border-custom"
-         style="cursor:pointer;transition:background .15s" onmouseover="this.style.background='#0d1520'" onmouseout="this.style.background=''">
-      <span style="font-size:1.5rem;line-height:1.3">${CAT_ICONS[r.type]}</span>
-      <div class="flex-grow-1 min-width-0">
+         style="cursor:pointer" onmouseover="this.style.background='#0d1520'" onmouseout="this.style.background=''">
+      <span style="font-size:1.5rem;line-height:1.4">${CAT_ICONS[r.type]}</span>
+      <div class="flex-grow-1">
         <div class="d-flex align-items-center gap-2 flex-wrap">
           <strong style="font-size:.88rem">${catLabel(r.type)}</strong>
-          ${r.isNew ? `<span class="badge badge-new rounded-pill">${t('badgeNew')}</span>` : ''}
+          ${r.isNew?`<span class="badge badge-new rounded-pill">${t('badgeNew')}</span>`:''}
           ${chainBadge()}
         </div>
         <div class="text-muted-custom" style="font-size:.75rem">${r.area} · ${r.time}</div>
+        <div class="mono" style="font-size:.68rem;color:#2a6a8a">📍 ${r.lat.toFixed(4)}, ${r.lng.toFixed(4)}</div>
       </div>
-      <div class="d-flex align-items-center gap-1 flex-shrink-0">
-        ${statusBadge(r.status)}
-      </div>
-    </div>
-  `).join('');
+      <div>${statusBadge(r.status)}</div>
+    </div>`).join('');
 }
 
-// ── Dashboard table ──────────────────────────────────────────
-function renderTable() {
-  const body = document.getElementById('report-table-body');
-  if (!body) return;
-  const filter = document.getElementById('filter-select')?.value || 'all';
-  const rows = filter==='all' ? reports : reports.filter(r=>r.type===filter);
-  body.innerHTML = rows.map(r => `
+function renderStats(){
+  const tt=document.getElementById('stat-total');const oc=document.getElementById('stat-onchain');const rs=document.getElementById('stat-resolved');
+  if(tt)tt.textContent=reports.length;if(oc)oc.textContent=reports.length;
+  if(rs)rs.textContent=reports.filter(r=>r.status==='resolved').length;
+}
+
+function renderTable(){
+  const body=document.getElementById('report-table-body');if(!body)return;
+  const f=document.getElementById('filter-select')?.value||'all';
+  const rows=f==='all'?reports:reports.filter(r=>r.type===f);
+  body.innerHTML=rows.map(r=>`
     <tr onclick="openDetail(${r.id})">
       <td>${catLabel(r.type)}</td>
       <td class="text-muted-custom">${r.area}</td>
-      <td><span class="mono" style="font-size:.72rem;color:#4a9fbf">${r.tx.slice(0,20)}…</span></td>
+      <td class="mono" style="font-size:.7rem;color:#4a9fbf">${r.lat.toFixed(4)}, ${r.lng.toFixed(4)}</td>
+      <td class="mono" style="font-size:.7rem;color:#4a9fbf">${r.tx.slice(0,14)}…</td>
       <td>${statusBadge(r.status)}</td>
       <td class="text-muted-custom" style="font-size:.78rem">${r.time.split(' ')[0]}</td>
-    </tr>
-  `).join('');
-
-  // Category counts + bars
-  ['pothole','traffic','electric','water'].forEach(type => {
-    const count = reports.filter(r=>r.type===type).length;
-    const pct = Math.round((count/reports.length)*100);
-    const cel = document.getElementById(`cat-${type}-count`);
-    const bar = document.getElementById(`bar-${type}`);
-    if (cel) cel.textContent = count;
-    if (bar) bar.style.width = pct+'%';
+    </tr>`).join('');
+  ['pothole','traffic','electric','water'].forEach(type=>{
+    const count=reports.filter(r=>r.type===type).length;
+    const pct=Math.round((count/reports.length)*100);
+    const cel=document.getElementById(`cat-${type}-count`);const bar=document.getElementById(`bar-${type}`);
+    if(cel)cel.textContent=count;if(bar)bar.style.width=pct+'%';
   });
 }
 
-// ── Stats ────────────────────────────────────────────────────
-function renderStats() {
-  const t2 = document.getElementById('stat-total');
-  const oc = document.getElementById('stat-onchain');
-  const rs = document.getElementById('stat-resolved');
-  if (t2) t2.textContent = reports.length;
-  if (oc) oc.textContent = reports.length;
-  if (rs) rs.textContent = reports.filter(r=>r.status==='resolved').length;
-}
-
-// ── My Reports ───────────────────────────────────────────────
-function renderMyReports() {
-  const el = document.getElementById('my-reports-list');
-  if (!el) return;
-  if (myReports.length === 0) {
-    el.innerHTML = `<div class="text-center text-muted-custom py-5"><i class="bi bi-inbox fs-2 d-block mb-2"></i><span>${t('myEmpty')}</span></div>`;
-    return;
+function renderMyReports(){
+  const el=document.getElementById('my-reports-list');if(!el)return;
+  if(!myReports.length){
+    el.innerHTML=`<div class="text-center text-muted-custom py-5"><i class="bi bi-inbox fs-2 d-block mb-2"></i><span>${t('myEmpty')}</span></div>`;return;
   }
-  el.innerHTML = myReports.map(r => `
+  el.innerHTML=myReports.map(r=>`
     <div onclick="openDetail(${r.id})" class="card mb-3 chain-anim" style="cursor:pointer">
       <div class="card-body">
         <div class="d-flex align-items-start gap-3">
           <span style="font-size:2rem">${CAT_ICONS[r.type]}</span>
           <div class="flex-grow-1">
             <div class="d-flex gap-2 align-items-center flex-wrap mb-1">
-              <strong>${catLabel(r.type)}</strong>
-              ${chainBadge()}
-              ${statusBadge(r.status)}
+              <strong>${catLabel(r.type)}</strong>${chainBadge()}${statusBadge(r.status)}
             </div>
-            <div class="text-muted-custom small mb-2">${r.desc}</div>
+            <div class="text-muted-custom small mb-1">${r.desc}</div>
+            <div class="mono mb-2" style="font-size:.72rem;color:var(--accent)">
+              📍 ${r.lat.toFixed(5)}, ${r.lng.toFixed(5)} ${r.accuracy?`(±${Math.round(r.accuracy)}m)`:'(approx)'}
+            </div>
             <div class="form-label mb-1">${t('txLabel')}</div>
             <div class="hash-box">${r.tx}</div>
           </div>
         </div>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-function renderAll() {
-  renderMap();
-  renderRecent();
-  renderStats();
-  renderTable();
-  renderMyReports();
-}
-
-// ── Detail Modal ─────────────────────────────────────────────
-function openDetail(id) {
-  const r = reports.find(x=>x.id===id);
-  if (!r) return;
-  document.getElementById('modal-title').innerHTML = `${CAT_ICONS[r.type]} ${catLabel(r.type)} — ${r.area}`;
-  document.getElementById('modal-body').innerHTML = `
+// ── Detail Modal ──────────────────────────────────────────────
+function openDetail(id){
+  const r=reports.find(x=>x.id===id);if(!r)return;
+  document.getElementById('modal-title').innerHTML=`${CAT_ICONS[r.type]} ${catLabel(r.type)} — ${r.area}`;
+  document.getElementById('modal-body').innerHTML=`
     <p class="text-muted-custom small mb-3">${r.desc}</p>
-    <div class="d-flex gap-2 flex-wrap mb-3">
-      ${chainBadge()} ${statusBadge(r.status)}
-    </div>
-    ${[
-      [t('txLabel'), r.tx],
-      [t('blockLabel'), r.block],
-      [t('ipfsLabel'), r.ipfs],
-      ['GPS', `${r.x/700*0.08+36.79}°E, ${-1.27-r.y/420*0.07}°S`],
-      ['Reporter', r.reporter],
-      [t('timeLabel'), r.time],
-    ].map(([l,v])=>`
-      <div class="mb-2">
-        <div class="form-label">${l}</div>
-        <div class="hash-box">${v}</div>
-      </div>
-    `).join('')}
-  `;
+    <div class="d-flex gap-2 flex-wrap mb-3">${chainBadge()} ${statusBadge(r.status)}</div>
+    ${[[t('txLabel'),r.tx],[t('blockLabel'),r.block],[t('ipfsLabel'),r.ipfs],
+       ['GPS Coordinates',`${r.lat.toFixed(6)}, ${r.lng.toFixed(6)}${r.accuracy?` (±${Math.round(r.accuracy)}m accuracy)`:''}`],
+       ['Reporter',r.reporter],[t('timeLabel'),r.time]
+    ].map(([l,v])=>`<div class="mb-2"><div class="form-label">${l}</div><div class="hash-box">${v}</div></div>`).join('')}
+    <button class="btn btn-sm btn-outline-secondary mt-1 w-100" onclick="flyTo(${r.id})">
+      <i class="bi bi-geo-alt me-1"></i>View on Map
+    </button>`;
   new bootstrap.Modal(document.getElementById('detailModal')).show();
 }
 
-// ── Report Form ───────────────────────────────────────────────
-let selectedCat = null;
-let photoReady  = false;
-let formStep    = 1;
+function flyTo(id){
+  const r=reports.find(x=>x.id===id);if(!r||!map)return;
+  bootstrap.Modal.getInstance(document.getElementById('detailModal'))?.hide();
+  showPage('map',document.querySelector('.nav-link'));
+  setTimeout(()=>map.flyTo([r.lat,r.lng],17,{duration:1.2}),200);
+}
 
-function selectCat(cat, el) {
-  selectedCat = cat;
+// ── REAL GPS ──────────────────────────────────────────────────
+function captureGPS(){
+  const zone=document.getElementById('gps-zone');
+  const label=document.getElementById('gps-label');
+  const sub=document.getElementById('gps-sub');
+  if(zone.classList.contains('captured'))return;
+
+  zone.className='gps-zone locating';
+  label.innerHTML=`<span class="spinning">📡</span> ${t('gpsLocating')}`;
+  sub.textContent='';
+
+  if(!navigator.geolocation){useFallback(zone,label,sub);return;}
+
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      capturedLat=pos.coords.latitude;
+      capturedLng=pos.coords.longitude;
+      capturedAccuracy=pos.coords.accuracy;
+
+      zone.className='gps-zone captured';
+      label.innerHTML=`${t('gpsDone')}`;
+      sub.innerHTML=`<span class="mono">${capturedLat.toFixed(5)}, ${capturedLng.toFixed(5)}</span>`;
+
+      // Show accuracy bar
+      const acc=Math.round(capturedAccuracy);
+      const display=document.getElementById('accuracy-display');
+      const txt=document.getElementById('accuracy-text');
+      const fill=document.getElementById('accuracy-fill');
+      display.style.display='block';
+      if(acc<=20){txt.textContent=`Good (~${acc}m)`;txt.style.color='var(--green)';fill.style.background='var(--green)';fill.style.width='90%';}
+      else if(acc<=100){txt.textContent=`Fair (~${acc}m)`;txt.style.color='var(--yellow)';fill.style.background='var(--yellow)';fill.style.width='55%';}
+      else{txt.textContent=`Poor (~${acc}m)`;txt.style.color='var(--orange)';fill.style.background='var(--orange)';fill.style.width='20%';}
+
+      advanceStep(3);
+    },
+    ()=>useFallback(zone,label,sub),
+    {enableHighAccuracy:true,timeout:10000,maximumAge:0}
+  );
+}
+
+function useFallback(zone,label,sub){
+  // Nairobi area fallback with small random scatter
+  capturedLat=-1.2921+(Math.random()-0.5)*0.03;
+  capturedLng=36.8219+(Math.random()-0.5)*0.03;
+  capturedAccuracy=null;
+  zone.className='gps-zone captured failed';
+  label.innerHTML=t('gpsFailed');
+  sub.innerHTML=`<span class="mono">${capturedLat.toFixed(5)}, ${capturedLng.toFixed(5)}</span>`;
+  document.getElementById('accuracy-display').style.display='none';
+  advanceStep(3);
+}
+
+// ── Form ──────────────────────────────────────────────────────
+let selectedCat=null;
+
+function selectCat(cat,el){
+  selectedCat=cat;
   document.querySelectorAll('.cat-card').forEach(c=>c.classList.remove('selected'));
   el.classList.add('selected');
   advanceStep(2);
 }
 
-function capturePhoto() {
-  photoReady = true;
-  const zone = document.getElementById('photo-zone');
-  zone.classList.add('captured');
-  zone.innerHTML = `<i class="bi bi-check-circle fs-3 d-block mb-2"></i>
-    <span>${t('photoDone')}</span>
-    <div class="small mt-1" style="color:var(--muted)">GPS: -1.2921°, 36.8219° · ${new Date().toLocaleTimeString()}</div>`;
-  advanceStep(3);
+function advanceStep(to){
+  for(let i=1;i<=4;i++){const d=document.getElementById('dot'+i);if(d)d.classList.toggle('done',i<=to);}
+  document.getElementById('step2-area').style.display=to>=2?'block':'none';
+  document.getElementById('step3-area').style.display=to>=3?'block':'none';
+  document.getElementById('step4-area').style.display=to>=3?'block':'none';
+  if(to===3)document.getElementById('desc-input')?.focus();
 }
 
-function advanceStep(to) {
-  formStep = to;
-  for (let i=1;i<=4;i++) {
-    const dot = document.getElementById('dot'+i);
-    if (dot) dot.classList.toggle('done', i<=to);
-  }
-  document.getElementById('step2-area').style.display = to>=2?'block':'none';
-  document.getElementById('step3-area').style.display = to>=3?'block':'none';
-  document.getElementById('step4-area').style.display = to>=3?'block':'none';
-  if (to===3) document.getElementById('desc-input')?.focus();
-}
-
-async function submitReport() {
-  if (!selectedCat || !photoReady) return;
-  const btn = document.getElementById('submit-btn');
-  btn.disabled = true;
-  btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>${t('submitting')}`;
-
+async function submitReport(){
+  if(!selectedCat||!capturedLat)return;
+  const btn=document.getElementById('submit-btn');
+  btn.disabled=true;
+  btn.innerHTML=`<span class="spinner-border spinner-border-sm me-2"></span>${t('submitting')}`;
   await new Promise(r=>setTimeout(r,2200));
 
-  const newReport = {
-    id: reports.length+1,
-    type: selectedCat,
-    x: 200+Math.floor(Math.random()*300),
-    y: 100+Math.floor(Math.random()*220),
-    area: "Your Location",
-    desc: document.getElementById('desc-input').value || "No description provided",
-    status: "open",
-    tx:    mockTx(),
-    block: mockBlock(),
-    ipfs:  mockIpfs(),
-    time:  new Date().toISOString().slice(0,16).replace('T',' '),
-    reporter: "0x"+[...Array(12)].map(()=>Math.floor(Math.random()*16).toString(16)).join(""),
-    isNew: true,
+  const nr={
+    id:reports.length+1,type:selectedCat,
+    lat:capturedLat,lng:capturedLng,accuracy:capturedAccuracy,
+    area:"Your Location",
+    desc:document.getElementById('desc-input').value||"No description provided",
+    status:"open",tx:mockTx(),block:mockBlock(),ipfs:mockIpfs(),
+    time:new Date().toISOString().slice(0,16).replace('T',' '),
+    reporter:"0x"+[...Array(12)].map(()=>Math.floor(Math.random()*16).toString(16)).join(""),
+    isNew:true,
   };
-  reports.unshift(newReport);
-  myReports.unshift(newReport);
+  reports.unshift(nr);myReports.unshift(nr);
 
-  document.getElementById('result-tx').textContent    = newReport.tx;
-  document.getElementById('result-block').textContent = newReport.block;
-  document.getElementById('result-ipfs').textContent  = newReport.ipfs;
-  document.getElementById('result-time').textContent  = newReport.time;
+  document.getElementById('result-tx').textContent=nr.tx;
+  document.getElementById('result-block').textContent=nr.block;
+  document.getElementById('result-ipfs').textContent=nr.ipfs;
+  document.getElementById('result-gps').textContent=`${nr.lat.toFixed(6)}, ${nr.lng.toFixed(6)}${nr.accuracy?` (±${Math.round(nr.accuracy)}m)`:'  (approximate)'}`;
+  document.getElementById('result-time').textContent=nr.time;
+  document.getElementById('form-area').style.display='none';
+  document.getElementById('success-area').style.display='block';
 
-  document.getElementById('form-area').style.display    = 'none';
-  document.getElementById('success-area').style.display = 'block';
+  // Add pin to live map immediately
+  if(map){
+    const m=L.marker([nr.lat,nr.lng],{icon:makeIcon(nr.type,'open')});
+    m.bindPopup(buildPopup(nr));m.on('click',()=>openDetail(nr.id));m.addTo(map);mapMarkers.push(m);
+  }
   renderStats();
 }
 
-function resetForm() {
-  selectedCat = null; photoReady = false; formStep = 1;
+function resetForm(){
+  selectedCat=null;capturedLat=null;capturedLng=null;capturedAccuracy=null;
   document.querySelectorAll('.cat-card').forEach(c=>c.classList.remove('selected'));
-  const zone = document.getElementById('photo-zone');
-  zone.classList.remove('captured');
-  zone.innerHTML = `<i class="bi bi-camera fs-3 d-block mb-2"></i><span>${t('photoBtn')}</span>`;
-  document.getElementById('desc-input').value = '';
-  document.getElementById('step2-area').style.display = 'none';
-  document.getElementById('step3-area').style.display = 'none';
-  document.getElementById('step4-area').style.display = 'none';
-  for(let i=1;i<=4;i++) { const d=document.getElementById('dot'+i); d&&(d.className='step-dot'+(i===1?' done':'')); }
+  const zone=document.getElementById('gps-zone');
+  zone.className='gps-zone';
+  document.getElementById('gps-label').innerHTML=`<i class="bi bi-geo-alt fs-3 d-block mb-2"></i><span>${t('gpsBtn')}</span>`;
+  document.getElementById('gps-sub').textContent=t('gpsSub');
+  document.getElementById('accuracy-display').style.display='none';
+  document.getElementById('desc-input').value='';
+  for(let i=1;i<=4;i++){const d=document.getElementById('dot'+i);if(d)d.className='step-dot'+(i===1?' done':'');}
+  ['step2-area','step3-area','step4-area'].forEach(id=>document.getElementById(id).style.display='none');
   const btn=document.getElementById('submit-btn');
-  btn.disabled=false; btn.innerHTML=`<i class="bi bi-box-arrow-up me-2"></i>${t('submitBtn')}`;
+  btn.disabled=false;btn.innerHTML=`<i class="bi bi-box-arrow-up me-2"></i>${t('submitBtn')}`;
   document.getElementById('form-area').style.display='block';
   document.getElementById('success-area').style.display='none';
-  showPage('map', document.querySelector('.nav-link'));
+  showPage('map',document.querySelector('.nav-link'));
 }
 
-function filterTable() { renderTable(); }
-
-// ── Export CSV ───────────────────────────────────────────────
-function exportCSV() {
-  const headers = ['ID','Type','Area','Description','Status','TX Hash','Block','IPFS','Time'];
-  const rows = reports.map(r=>[r.id,r.type,r.area,`"${r.desc}"`,r.status,r.tx,r.block,r.ipfs,r.time]);
-  const csv  = [headers, ...rows].map(r=>r.join(',')).join('\n');
-  const a    = document.createElement('a');
-  a.href     = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  a.download = 'civicchain-reports.csv';
-  a.click();
+// ── Export CSV ────────────────────────────────────────────────
+function exportCSV(){
+  const h=['ID','Type','Area','Latitude','Longitude','Accuracy(m)','Description','Status','TX Hash','Block','IPFS','Time'];
+  const rows=reports.map(r=>[r.id,r.type,r.area,r.lat,r.lng,r.accuracy||'N/A',`"${r.desc}"`,r.status,r.tx,r.block,r.ipfs,r.time]);
+  const csv=[h,...rows].map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='civicchain-reports.csv';a.click();
 }
 
-// ── Init ─────────────────────────────────────────────────────
-renderAll();
+// ── Init ──────────────────────────────────────────────────────
+setTimeout(()=>{initMap();renderRecent();renderStats();renderTable();},200);
 </script>
 </body>
 </html>
